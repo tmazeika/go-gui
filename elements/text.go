@@ -6,9 +6,9 @@ import (
 )
 
 type Text struct {
-	Content    string
-	parentData interface{}
-	surface    *sdl.Surface
+	Content string
+	parentData
+	surface *sdl.Surface
 }
 
 func (b *Text) GetSize(c Constraints) Size {
@@ -17,33 +17,20 @@ func (b *Text) GetSize(c Constraints) Size {
 		panic(err)
 	}
 	defer font.Close()
-	surface, err := font.RenderUTF8BlendedWrapped(b.Content, sdl.Color{A: 255}, int(c.Max.Width))
+	if c.Max.Width.IsUnbounded() {
+		b.surface, err = font.RenderUTF8Blended(b.Content, sdl.Color{A: 255})
+	} else {
+		b.surface, err = font.RenderUTF8BlendedWrapped(b.Content, sdl.Color{A: 255}, int(c.Max.Width))
+	}
 	if err != nil {
 		panic(err)
 	}
-	b.surface = surface
-	return Size{
-		Width:  max(c.Min.Width, float32(surface.W)),
-		Height: max(c.Min.Height, min(c.Max.Height, float32(surface.H))),
-	}
+	return NewSize(Length(b.surface.W), Length(b.surface.H)).GrowToSatisfy(c)
 }
 
 func (b *Text) Draw(surface *sdl.Surface, r Rect) {
 	defer b.surface.Free()
-	if err := b.surface.Blit(nil, surface, &sdl.Rect{
-		X: int32(r.X),
-		Y: int32(r.Y),
-		W: int32(r.Width),
-		H: int32(r.Height),
-	}); err != nil {
+	if err := b.surface.Blit(nil, surface, r.ToSdl()); err != nil {
 		panic(err)
 	}
-}
-
-func (b *Text) GetParentData() interface{} {
-	return b.parentData
-}
-
-func (b *Text) SetParentData(data interface{}) {
-	b.parentData = data
 }

@@ -29,21 +29,20 @@ func main() {
 	}
 	surface.FillRect(nil, 0)
 
-	tree := elements.Padding{
+	tree := &elements.Padding{
 		Top:    50,
 		Right:  50,
 		Bottom: 50,
 		Left:   50,
 		Child: &elements.Background{
 			Color: 0xffeb7e75,
-			Child: &elements.Padding{
-				Top:    20,
-				Right:  20,
-				Bottom: 20,
-				Left:   20,
-				Child: &elements.Column{
-					Alignment: elements.CenterAlign,
-					Gap:       20,
+			Child: &elements.Grow{
+				Axes: elements.AxesXY,
+				Child: &elements.Flex{
+					Axis:         elements.AxisX,
+					Alignment:    elements.AlignStretch,
+					Distribution: elements.DistributeEnd,
+					Fit:          elements.FlexLoose,
 					Children: []elements.Box{
 						&elements.Background{
 							Color: 0xffe8eb6a,
@@ -57,13 +56,42 @@ func main() {
 								Content: "Hello, world!",
 							},
 						},
+						// &elements.FlexItem{
+						// 	Factor: 2,
+						// 	Child: &elements.Background{
+						// 		Color: 0xffffcc00,
+						// 		Child: &elements.Sized{
+						// 			Width:  100,
+						// 			Height: 100,
+						// 		},
+						// 	},
+						// },
+						// &elements.FlexItem{
+						// 	Factor: 1,
+						// 	Child: &elements.Background{
+						// 		Color: 0xffff0000,
+						// 		Child: &elements.Sized{
+						// 			Width:  100,
+						// 			Height: 100,
+						// 		},
+						// 	},
+						// },
+						&elements.Center{
+							Child: &elements.Background{
+								Color: 0xff9980f2,
+								Child: &elements.Sized{
+									Width:  150,
+									Height: 150,
+								},
+							},
+						},
 					},
 				},
 			},
 		},
 	}
 	mainSize := tree.GetSize(elements.NewConstraints(0, 0, 800, 600))
-	tree.Draw(surface, elements.Rect{Size: mainSize})
+	tree.Draw(surface, elements.NewRect(0, mainSize.Width, 0, mainSize.Height))
 	window.UpdateSurface()
 
 	running := true
