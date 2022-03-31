@@ -98,6 +98,9 @@ func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
 		size := child.GetParentData().(Size)
 		childrenWidth += size.Width
 	}
+	spaceAroundUnit := Length(0)
+	spaceBetweenUnit := Length(0)
+	spaceEvenlyUnit := Length(0)
 	switch b.Distribution {
 	case DistributeStart:
 	case DistributeCenter:
@@ -105,8 +108,19 @@ func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
 	case DistributeEnd:
 		left = r.Right - childrenWidth
 	case DistributeSpaceAround:
+		if len(b.Children) > 0 {
+			spaceAroundUnit = (r.Width() - childrenWidth) / Length(len(b.Children)*2)
+			left += spaceAroundUnit
+		}
 	case DistributeSpaceBetween:
+		if len(b.Children) > 1 {
+			spaceBetweenUnit = (r.Width() - childrenWidth) / Length(len(b.Children)-1)
+		}
 	case DistributeSpaceEvenly:
+		if len(b.Children) > 0 {
+			spaceEvenlyUnit = (r.Width() - childrenWidth) / Length(len(b.Children)+1)
+			left += spaceEvenlyUnit
+		}
 	}
 	for _, child := range b.Children {
 		size := child.GetParentData().(Size)
@@ -122,6 +136,6 @@ func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
 			rect = rect.Flip()
 		}
 		child.Draw(surface, rect)
-		left += size.Width
+		left += size.Width + spaceAroundUnit*2 + spaceBetweenUnit + spaceEvenlyUnit
 	}
 }

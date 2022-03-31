@@ -34,54 +34,57 @@ func main() {
 		Right:  50,
 		Bottom: 50,
 		Left:   50,
-		Child: &elements.Background{
-			Color: 0xffeb7e75,
-			Child: &elements.Grow{
-				Axes: elements.AxesXY,
-				Child: &elements.Flex{
-					Axis:         elements.AxisX,
-					Alignment:    elements.AlignStretch,
-					Distribution: elements.DistributeEnd,
-					Fit:          elements.FlexLoose,
-					Children: []elements.Box{
-						&elements.Background{
-							Color: 0xffe8eb6a,
-							Child: &elements.Text{
-								Content: "Hi!",
+		Child: &elements.ClipBox{
+			Radius: 20,
+			Child: &elements.Background{
+				Color: 0xffeb7e75,
+				Child: &elements.Grow{
+					Axes: elements.AxesXY,
+					Child: &elements.Flex{
+						Axis:         elements.AxisY,
+						Alignment:    elements.AlignStart,
+						Distribution: elements.DistributeSpaceBetween,
+						Fit:          elements.FlexLoose,
+						Children: []elements.Box{
+							&elements.Background{
+								Color: 0xffe8eb6a,
+								Child: &elements.Text{
+									Content: "Hi!",
+								},
 							},
-						},
-						&elements.Background{
-							Color: 0xffedc268,
-							Child: &elements.Text{
-								Content: "Hello, world!",
+							&elements.Background{
+								Color: 0xffedc268,
+								Child: &elements.Text{
+									Content: "Hello, world!",
+								},
 							},
-						},
-						// &elements.FlexItem{
-						// 	Factor: 2,
-						// 	Child: &elements.Background{
-						// 		Color: 0xffffcc00,
-						// 		Child: &elements.Sized{
-						// 			Width:  100,
-						// 			Height: 100,
-						// 		},
-						// 	},
-						// },
-						// &elements.FlexItem{
-						// 	Factor: 1,
-						// 	Child: &elements.Background{
-						// 		Color: 0xffff0000,
-						// 		Child: &elements.Sized{
-						// 			Width:  100,
-						// 			Height: 100,
-						// 		},
-						// 	},
-						// },
-						&elements.Center{
-							Child: &elements.Background{
-								Color: 0xff9980f2,
-								Child: &elements.Sized{
-									Width:  150,
-									Height: 150,
+							// &elements.FlexItem{
+							// 	Factor: 2,
+							// 	Child: &elements.Background{
+							// 		Color: 0xffffcc00,
+							// 		Child: &elements.Sized{
+							// 			Width:  100,
+							// 			Height: 100,
+							// 		},
+							// 	},
+							// },
+							// &elements.FlexItem{
+							// 	Factor: 1,
+							// 	Child: &elements.Background{
+							// 		Color: 0xffff0000,
+							// 		Child: &elements.Sized{
+							// 			Width:  100,
+							// 			Height: 100,
+							// 		},
+							// 	},
+							// },
+							&elements.Center{
+								Child: &elements.Background{
+									Color: 0xff9980f2,
+									Child: &elements.Sized{
+										Width:  150,
+										Height: 150,
+									},
 								},
 							},
 						},
