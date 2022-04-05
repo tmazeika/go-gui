@@ -5,6 +5,14 @@ import (
 	"math"
 )
 
+type Color uint32
+
+func (c Color) SetDrawColorFor(g *sdl.Renderer) {
+	if err := g.SetDrawColor(uint8(c>>16), uint8(c>>8), uint8(c), uint8(c>>24)); err != nil {
+		panic(err)
+	}
+}
+
 type Length float32
 
 func (l Length) IsUnbounded() bool {
@@ -64,21 +72,21 @@ func NewSize(width, height Length) Size {
 }
 
 func (s Size) PlaceAtTopLeft(r Rect) Rect {
-	if s.Width > r.Width() || s.Height > r.Height() {
+	if s.Width > r.Width || s.Height > r.Height {
 		panic("size cannot fit in rect")
 	}
-	return NewRect(r.Left, r.Left+s.Width, r.Top, r.Top+s.Height)
+	return NewRect(r.Left, r.Top, s.Width, s.Height)
 }
 
 func (s Size) PlaceAtCenter(r Rect) Rect {
-	addX := (r.Width() - s.Width) / 2
-	addY := (r.Height() - s.Height) / 2
+	addX := (r.Width - s.Width) / 2
+	addY := (r.Height - s.Height) / 2
 	if addX < 0 || addY < 0 {
 		panic("size cannot fit in rect")
 	}
 	r.Left += addX
 	r.Top += addY
-	return NewRect(r.Left, r.Left+s.Width, r.Top, r.Top+s.Height)
+	return NewRect(r.Left, r.Top, s.Width, s.Height)
 }
 
 func (s Size) Flip() Size {
@@ -282,54 +290,53 @@ func (c Constraints) UnboundedHeight() Constraints {
 }
 
 type Rect struct {
-	Left   Length
-	Right  Length
-	Top    Length
-	Bottom Length
+	Left Length
+	Top  Length
+	Size
 }
 
-func NewRect(left, right, top, bottom Length) Rect {
-	if left.IsUnbounded() || right.IsUnbounded() || top.IsUnbounded() || bottom.IsUnbounded() {
+func NewRect(left, top, width, height Length) Rect {
+	if left.IsUnbounded() || top.IsUnbounded() || width.IsUnbounded() || height.IsUnbounded() {
 		panic("rect cannot have unbounded sides")
 	}
-	if left > right || top > bottom {
-		panic("rect cannot have negative dimensions")
+	if width < 0 || height < 0 {
+		panic("rect cannot have negative width or height")
 	}
-	return Rect{left, right, top, bottom}
+	return Rect{left, top, Size{width, height}}
 }
 
 func (r Rect) Flip() Rect {
-	return Rect{r.Top, r.Bottom, r.Left, r.Right}
-}
-
-func (r Rect) Width() Length {
-	return r.Right - r.Left
-}
-
-func (r Rect) Height() Length {
-	return r.Bottom - r.Top
+	return Rect{r.Top, r.Left, Size{r.Height, r.Width}}
 }
 
 func (r Rect) Grow(left, right, top, bottom Length) Rect {
-	return NewRect(r.Left-left, r.Right+right, r.Top-top, r.Bottom+bottom)
+	return NewRect(r.Left-left, r.Top-top, r.Width+left+right, r.Height+top+bottom)
 }
 
 func (r Rect) Shrink(left, right, top, bottom Length) Rect {
 	return r.Grow(-left, -right, -top, -bottom)
 }
 
-func (r Rect) ToSdl() *sdl.Rect {
-	return &sdl.Rect{
-		X: int32(r.Left),
-		Y: int32(r.Top),
-		W: int32(r.Right - r.Left),
-		H: int32(r.Bottom - r.Top),
+func (r Rect) Right() Length {
+	return r.Left + r.Width
+}
+
+func (r Rect) Bottom() Length {
+	return r.Top + r.Height
+}
+
+func (r Rect) ToSdl() *sdl.FRect {
+	return &sdl.FRect{
+		X: float32(r.Left),
+		Y: float32(r.Top),
+		W: float32(r.Width),
+		H: float32(r.Height),
 	}
 }
 
 type Box interface {
 	GetSize(c Constraints) Size
-	Draw(surface *sdl.Surface, r Rect)
+	Draw(g *sdl.Renderer, r Rect)
 	GetParentData() interface{}
 	SetParentData(data interface{})
 }

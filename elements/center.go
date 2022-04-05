@@ -18,9 +18,9 @@ func (b *Center) GetSize(c Constraints) Size {
 	return c.ShrinkUnbounded(size).Biggest()
 }
 
-func (b *Center) Draw(surface *sdl.Surface, r Rect) {
+func (b *Center) Draw(g *sdl.Renderer, r Rect) {
 	if b.Child != nil {
 		size := b.Child.GetParentData().(Size)
-		b.Child.Draw(surface, size.PlaceAtCenter(r))
+		b.Child.Draw(g, size.PlaceAtCenter(r))
 	}
 }

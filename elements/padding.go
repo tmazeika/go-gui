@@ -23,8 +23,8 @@ func (b *Padding) GetSize(c Constraints) Size {
 	return size.Grow(padX, padY).MustSatisfy(c)
 }
 
-func (b *Padding) Draw(surface *sdl.Surface, r Rect) {
+func (b *Padding) Draw(g *sdl.Renderer, r Rect) {
 	if b.Child != nil {
-		b.Child.Draw(surface, r.Shrink(b.Left, b.Right, b.Top, b.Bottom))
+		b.Child.Draw(g, r.Shrink(b.Left, b.Right, b.Top, b.Bottom))
 	}
 }

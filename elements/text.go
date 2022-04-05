@@ -28,9 +28,13 @@ func (b *Text) GetSize(c Constraints) Size {
 	return NewSize(Length(b.surface.W), Length(b.surface.H)).GrowToSatisfy(c)
 }
 
-func (b *Text) Draw(surface *sdl.Surface, r Rect) {
+func (b *Text) Draw(g *sdl.Renderer, r Rect) {
 	defer b.surface.Free()
-	if err := b.surface.Blit(nil, surface, r.ToSdl()); err != nil {
+	tex, err := g.CreateTextureFromSurface(b.surface)
+	if err != nil {
+		panic(err)
+	}
+	if err := g.CopyF(tex, nil, r.ToSdl()); err != nil {
 		panic(err)
 	}
 }

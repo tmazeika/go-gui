@@ -5,7 +5,7 @@ import (
 )
 
 type Background struct {
-	Color uint32
+	Color
 	Child Box
 	parentData
 }
@@ -17,11 +17,12 @@ func (b *Background) GetSize(c Constraints) Size {
 	return b.Child.GetSize(c)
 }
 
-func (b *Background) Draw(surface *sdl.Surface, r Rect) {
-	if err := surface.FillRect(r.ToSdl(), b.Color); err != nil {
+func (b *Background) Draw(g *sdl.Renderer, r Rect) {
+	b.Color.SetDrawColorFor(g)
+	if err := g.FillRectF(r.ToSdl()); err != nil {
 		panic(err)
 	}
 	if b.Child != nil {
-		b.Child.Draw(surface, r)
+		b.Child.Draw(g, r)
 	}
 }

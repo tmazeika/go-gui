@@ -18,8 +18,8 @@ func (b *Sized) GetSize(c Constraints) Size {
 	return b.Child.GetSize(c.Tighten(b.Width, b.Height))
 }
 
-func (b *Sized) Draw(surface *sdl.Surface, r Rect) {
+func (b *Sized) Draw(g *sdl.Renderer, r Rect) {
 	if b.Child != nil {
-		b.Child.Draw(surface, r)
+		b.Child.Draw(g, r)
 	}
 }

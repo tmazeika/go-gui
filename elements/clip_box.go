@@ -2,7 +2,6 @@ package elements
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	"math"
 )
 
 type ClipBox struct {
@@ -18,49 +17,96 @@ func (b *ClipBox) GetSize(c Constraints) Size {
 	return b.Child.GetSize(c)
 }
 
-func (b *ClipBox) Draw(surface *sdl.Surface, r Rect) {
-	cpy, err := surface.Duplicate()
+func (b *ClipBox) Draw(g *sdl.Renderer, r Rect) {
+	w, h, err := g.GetOutputSize()
 	if err != nil {
 		panic(err)
 	}
+	fgTex, err := g.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, w, h)
+	if err != nil {
+		panic(err)
+	}
+	maskTex, err := g.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, w, h)
+	if err != nil {
+		panic(err)
+	}
+	bgTex := g.GetRenderTarget()
+	if err := g.SetRenderTarget(fgTex); err != nil {
+		panic(err)
+	}
 	if b.Child != nil {
-		b.Child.Draw(cpy, r)
+		b.Child.Draw(g, r)
 	}
-	for y := int32(r.Top); y < int32(r.Bottom); y++ {
-		for x := int32(r.Left); x < int32(r.Right); x++ {
-			xLeft, xRight := r.Left+Length(b.Radius), r.Right-Length(b.Radius)
-			yTop, yBottom := r.Top+Length(b.Radius), r.Bottom-Length(b.Radius)
-			distTL := math.Sqrt(math.Pow(float64(x)-float64(xLeft), 2) + math.Pow(float64(y)-float64(yTop), 2))
-			distTR := math.Sqrt(math.Pow(float64(x)-float64(xRight), 2) + math.Pow(float64(y)-float64(yTop), 2))
-			distBR := math.Sqrt(math.Pow(float64(x)-float64(xRight), 2) + math.Pow(float64(y)-float64(yBottom), 2))
-			distBL := math.Sqrt(math.Pow(float64(x)-float64(xLeft), 2) + math.Pow(float64(y)-float64(yBottom), 2))
-			if distTL <= float64(b.Radius) || distTR <= float64(b.Radius) || distBR <= float64(b.Radius) || distBL <= float64(b.Radius) {
-				surface.Set(int(x), int(y), cpy.At(int(x), int(y)))
-			}
-		}
-	}
-	if err := cpy.Blit(&sdl.Rect{
-		X: int32(r.Left + Length(b.Radius)),
-		Y: int32(r.Top),
-		W: int32(r.Width() - Length(b.Radius*2)),
-		H: int32(r.Height()),
-	}, surface, r.Shrink(Length(b.Radius), Length(b.Radius*2), 0, 0).ToSdl()); err != nil {
+	if err := g.SetRenderTarget(maskTex); err != nil {
 		panic(err)
 	}
-	if err := cpy.Blit(&sdl.Rect{
-		X: int32(r.Left),
-		Y: int32(r.Top + Length(b.Radius)),
-		W: int32(r.Width()),
-		H: int32(r.Height() - Length(b.Radius*2)),
-	}, surface, r.Shrink(0, 0, Length(b.Radius), Length(b.Radius*2)).ToSdl()); err != nil {
+	if err := DrawRoundedRectangle(g, float32(r.Left), float32(r.Top), float32(r.Width), float32(r.Height), b.Radius, 255, 255, 255, 255); err != nil {
 		panic(err)
 	}
-	// if err := cpy.Blit(&sdl.Rect{
-	// 	X: int32(r.Left),
-	// 	Y: int32(r.Top + Length(b.Radius)),
-	// 	W: int32(r.Width()),
-	// 	H: int32(r.Height() - Length(b.Radius*2)),
-	// }, surface, r.ToSdl()); err != nil {
+	if err := g.SetRenderTarget(bgTex); err != nil {
+		panic(err)
+	}
+	if err := g.Copy(maskTex, nil, nil); err != nil {
+		panic(err)
+	}
+
+	// if err := gfx.FilledEllipseRGBA(g, int32(float32(r.Left)+b.Radius), int32(float32(r.Top)+b.Radius), int32(b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.AACircleRGBA(g, int32(float32(r.Left)+b.Radius), int32(float32(r.Top)+b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.FilledEllipseRGBA(g, int32(float32(r.Right)-b.Radius), int32(float32(r.Top)+b.Radius), int32(b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.AACircleRGBA(g, int32(float32(r.Right)-b.Radius), int32(float32(r.Top)+b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.FilledEllipseRGBA(g, int32(float32(r.Right)-b.Radius), int32(float32(r.Bottom)-b.Radius), int32(b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.AACircleRGBA(g, int32(float32(r.Right)-b.Radius), int32(float32(r.Bottom)-b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.FilledEllipseRGBA(g, int32(float32(r.Left)+b.Radius), int32(float32(r.Bottom)-b.Radius), int32(b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if err := gfx.AACircleRGBA(g, int32(float32(r.Left)+b.Radius), int32(float32(r.Bottom)-b.Radius), int32(b.Radius), 255, 255, 255, 255); !err {
+	// 	panic(err)
+	// }
+	// if b := gfx.FilledPolygonRGBA(g, []int16{int16(float32(r.Left) + b.Radius), int16(float32(r.Right) - b.Radius), int16(float32(r.Right) - b.Radius), int16(float32(r.Left) + b.Radius)}, []int16{int16(r.Top), int16(r.Top), int16(r.Bottom), int16(r.Bottom)}, 255, 255, 255, 255); !b {
+	// 	panic(b)
+	// }
+	// if b := gfx.FilledPolygonRGBA(g, []int16{int16(r.Left), int16(r.Right), int16(r.Right), int16(r.Left)}, []int16{int16(float32(r.Top) + b.Radius), int16(float32(r.Top) + b.Radius), int16(float32(r.Bottom) - b.Radius), int16(float32(r.Bottom) - b.Radius)}, 255, 255, 255, 255); !b {
+	// 	panic(b)
+	// }
+
+	// resTex, err := g.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, w, h)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// if err := resTex.SetBlendMode(sdl.BLENDMODE_BLEND); err != nil {
+	// 	panic(err)
+	// }
+	// if err := g.SetRenderTarget(resTex); err != nil {
+	// 	panic(err)
+	// }
+	// if err := maskTex.SetBlendMode(sdl.BLENDMODE_MOD); err != nil {
+	// 	panic(err)
+	// }
+	// if err := fgTex.SetBlendMode(sdl.BLENDMODE_NONE); err != nil {
+	// 	panic(err)
+	// }
+	// if err := g.Copy(fgTex, nil, nil); err != nil {
+	// 	panic(err)
+	// }
+	// if err := g.Copy(maskTex, nil, nil); err != nil {
+	// 	panic(err)
+	// }
+	// if err := g.SetRenderTarget(bgTex); err != nil {
+	// 	panic(err)
+	// }
+	// if err := g.Copy(resTex, nil, nil); err != nil {
 	// 	panic(err)
 	// }
 }

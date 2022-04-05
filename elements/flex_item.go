@@ -18,8 +18,8 @@ func (b *FlexItem) GetSize(c Constraints) Size {
 	return b.Child.GetSize(c)
 }
 
-func (b *FlexItem) Draw(surface *sdl.Surface, r Rect) {
+func (b *FlexItem) Draw(g *sdl.Renderer, r Rect) {
 	if b.Child != nil {
-		b.Child.Draw(surface, r)
+		b.Child.Draw(g, r)
 	}
 }

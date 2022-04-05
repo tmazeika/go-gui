@@ -26,8 +26,8 @@ func (b *Grow) GetSize(c Constraints) Size {
 	return b.Child.GetSize(c)
 }
 
-func (b *Grow) Draw(surface *sdl.Surface, r Rect) {
+func (b *Grow) Draw(g *sdl.Renderer, r Rect) {
 	if b.Child != nil {
-		b.Child.Draw(surface, r)
+		b.Child.Draw(g, r)
 	}
 }

@@ -87,7 +87,7 @@ func (b *Flex) GetSize(c Constraints) Size {
 	return size
 }
 
-func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
+func (b *Flex) Draw(g *sdl.Renderer, r Rect) {
 	if b.Axis == AxisY {
 		r = r.Flip()
 	}
@@ -104,21 +104,21 @@ func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
 	switch b.Distribution {
 	case DistributeStart:
 	case DistributeCenter:
-		left += (r.Width() - childrenWidth) / 2
+		left += (r.Width - childrenWidth) / 2
 	case DistributeEnd:
-		left = r.Right - childrenWidth
+		left = r.Right() - childrenWidth
 	case DistributeSpaceAround:
 		if len(b.Children) > 0 {
-			spaceAroundUnit = (r.Width() - childrenWidth) / Length(len(b.Children)*2)
+			spaceAroundUnit = (r.Width - childrenWidth) / Length(len(b.Children)*2)
 			left += spaceAroundUnit
 		}
 	case DistributeSpaceBetween:
 		if len(b.Children) > 1 {
-			spaceBetweenUnit = (r.Width() - childrenWidth) / Length(len(b.Children)-1)
+			spaceBetweenUnit = (r.Width - childrenWidth) / Length(len(b.Children)-1)
 		}
 	case DistributeSpaceEvenly:
 		if len(b.Children) > 0 {
-			spaceEvenlyUnit = (r.Width() - childrenWidth) / Length(len(b.Children)+1)
+			spaceEvenlyUnit = (r.Width - childrenWidth) / Length(len(b.Children)+1)
 			left += spaceEvenlyUnit
 		}
 	}
@@ -127,15 +127,15 @@ func (b *Flex) Draw(surface *sdl.Surface, r Rect) {
 		switch b.Alignment {
 		case AlignStart:
 		case AlignCenter:
-			top = r.Top + (r.Height()-size.Height)/2
+			top = r.Top + (r.Height-size.Height)/2
 		case AlignEnd:
-			top = r.Top + r.Height() - size.Height
+			top = r.Top + r.Height - size.Height
 		}
-		rect := NewRect(left, left+size.Width, top, top+size.Height)
+		rect := NewRect(left, top, size.Width, size.Height)
 		if b.Axis == AxisY {
 			rect = rect.Flip()
 		}
-		child.Draw(surface, rect)
+		child.Draw(g, rect)
 		left += size.Width + spaceAroundUnit*2 + spaceBetweenUnit + spaceEvenlyUnit
 	}
 }
